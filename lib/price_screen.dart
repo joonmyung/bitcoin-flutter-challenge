@@ -54,15 +54,19 @@ class _PriceScreenState extends State<PriceScreen> {
   }
 
 
-  String bitcoinValue = '?';
+  Map<String,String> coinValues = {};
+  bool isWaiting = false;
 
   //TODO: Create a method here called getData() to get the coin data from coin_data.dart
   void getData() async {
+    isWaiting = true;
+
     try {
       var data = await CoinData().getCoinData(selectedCurrency);
+      isWaiting = false;
 
       setState(() {
-        bitcoinValue = data;
+        coinValues = data;
       });
     } catch (e) {
       print (e);
@@ -86,27 +90,24 @@ class _PriceScreenState extends State<PriceScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Padding(
-            padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
-            child: Card(
-              color: Colors.lightBlueAccent,
-              elevation: 5.0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              CoinPriceCard(cryptoName: 'BTC',
+                  coinValue: isWaiting ? '?' : coinValues['BTC'],
+                  selectedCurrency: selectedCurrency
               ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
-                child: Text(
-                  //TODO: Update the Text Widget with the live bitcoin data here.
-                  '1 BTC = $bitcoinValue $selectedCurrency',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.white,
-                  ),
-                ),
+
+              CoinPriceCard(cryptoName: 'ETH',
+                  coinValue: isWaiting ? '?' : coinValues['ETH'],
+                  selectedCurrency: selectedCurrency
               ),
-            ),
+
+              CoinPriceCard(cryptoName: 'LTC',
+                  coinValue: isWaiting ? '?': coinValues['LTC'],
+                  selectedCurrency: selectedCurrency
+              ),
+            ]
           ),
           Container(
             height: 150.0,
@@ -119,4 +120,43 @@ class _PriceScreenState extends State<PriceScreen> {
       ),
     );
   }
+}
+
+class CoinPriceCard extends StatelessWidget {
+  const CoinPriceCard({
+    Key key,
+    @required this.cryptoName,
+    @required this.coinValue,
+    @required this.selectedCurrency,
+  }) : super(key: key);
+
+  final String cryptoName;
+  final String coinValue;
+  final String selectedCurrency;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
+      child: Card(
+          color: Colors.lightBlueAccent,
+          elevation: 5.0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
+            child: Text(
+              //TODO: Update the Text Widget with the live bitcoin data here.
+              '1 $cryptoName = $coinValue $selectedCurrency',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 20.0,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 }
